@@ -60,6 +60,7 @@ class Room
 		this.id = id;
 		this.x = x;
 		this.y = y;
+		this.tags = [];
 	}
 
 	draw()
