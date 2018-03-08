@@ -12,7 +12,7 @@ function scroll()
   */
   if (mouseIsPressed)
   {
-    console.log(mouseX-prevMouseX);
+    //console.log(mouseX-prevMouseX);
     x += mouseX - prevMouseX;
     y += mouseY - prevMouseY;
   }
