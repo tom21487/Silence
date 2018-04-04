@@ -1,0 +1,88 @@
+<!-- Some testing for photo recognition -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Codelympians Photo Recognition Testing</title>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+	<script src="p5.js"></script>
+	<style>
+		body 
+		{
+			margin-left: 20%;
+		}
+	</style>
+</head>
+<body>
+<script type="text/javascript">
+    function processImage() 
+	{
+        var subscriptionKey = "98a8c00f57a5494689bc4a81512ca690";
+        var uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/analyze";
+
+        var params = {
+            "visualFeatures": "Categories,Description,Color",
+            "details": "",
+            "language": "en",
+        };
+
+        // Display the image.
+        var sourceImageUrl = document.getElementById("inputImage").value;
+        document.querySelector("#sourceImage").src = sourceImageUrl;
+
+        // Perform the REST API call.
+        $.ajax({
+            url: uriBase + "?" + $.param(params),
+            // Request headers.
+            beforeSend: function(xhrObj)
+			{
+                xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+            },
+            type: "POST",
+            // Request body.
+            data: '{"url": ' + '"' + sourceImageUrl + '"}',
+			})
+
+        .done(function(data) {
+            // Show formatted JSON on webpage.
+            $("#responseTextArea").val(JSON.stringify(data, null, 2));
+			if (data.description && data.description.captions)
+			{
+				var caption = data.description.captions[0];
+				if (caption.text && caption.confidence)
+				{
+					$("#box").val(caption.text.charAt(0).toUpperCase() + caption.text.slice(1) + ". (Confidence: " + caption.confidence + ")");
+				}
+			}
+        })
+    };
+	
+	//Put this into a sketch.js file and run the script halfway through?
+	/*
+	function setup()
+	{
+		createCanvas(640, 480);
+		background(100);
+	}
+	*/
+</script>
+
+<h1>Codelympians "PhotoFinder/Silence" Project Photo Recognition v0.1</h1>
+Enter a URL and click "Go" to get information about it! Please be patient while stuff loads <br>
+<input type="text" name="inputImage" id="inputImage" value="http://upload.wikimedia.org/wikipedia/commons/3/3c/Shaki_waterfall.jpg" />
+	<button onclick="processImage()">Go</button>
+
+	<div id="imageDiv">
+        Source image: <br>
+		<img id="sourceImage" width="400"></img> <br><br>
+		Summary: <br>
+		<textarea id="box" style="width: 580px"></textarea>
+    </div>
+	
+    <div id="jsonOutput">
+        Detailed data (to be used later):
+        <br>
+        <textarea id="responseTextArea" style="width:580px; height:400px;"></textarea>
+    </div>
+</body>
+</html>
