@@ -72,8 +72,8 @@ var imgFloor3;
 function preload()
 {
 	img = loadImage(imgURL);
-	imgFloor1 = laodImage("Floor 1");
-	imgFloor3 = loadImage("Floor 3");
+	imgFloor1 = laodImage("Floor.1.pdf");
+	imgFloor3 = loadImage("Floor.3.pdf");
 }
 
 var analyzeButton = new Button(10, 50);
