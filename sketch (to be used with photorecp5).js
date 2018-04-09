@@ -67,9 +67,13 @@ function processImage()
 };
 
 var img;
+var imgFloor1;
+var imgFloor3;
 function preload()
 {
 	img = loadImage(imgURL);
+	imgFloor1 = laodImage("Floor 1");
+	imgFloor3 = loadImage("Floor 3");
 }
 
 var analyzeButton = new Button(10, 50);
