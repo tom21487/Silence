@@ -1,0 +1,132 @@
+var mouseIsReleased = false;
+var imgURL = "http://upload.wikimedia.org/wikipedia/commons/3/3c/Shaki_waterfall.jpg";
+var imgCaption = "No analysis yet.";
+var imgTags = [];
+var JSONData = "No data yet.";
+class Button
+{
+	constructor(text, x, y)
+	{
+		this.x = x;
+		this.y = y;
+		this.clicked = false;
+		this.text = text;
+	}
+
+	draw()
+	{
+		rect(this.x, this.y, 50, 50);
+		if (mouseX > this.x && mouseX < this.x+50 && mouseY > this.y && mouseY < this.y+50)
+		{
+			if (mouseIsReleased)
+				this.clicked = true;
+			else this.clicked = false;
+		}
+		fill(0);
+		text(this.text, this.x+5, this.y+30);
+	}
+}
+
+var img, mapPNG;
+function preload()
+{
+	img = loadImage(imgURL);
+	mapPNG = loadImage("map.png");
+}
+
+var analyzeButton = new Button("Analyze", 10, 50);
+var changeURL = new Button("URL", 70, 50);
+var modeButton = new Button("Switch", 10, 400);
+var mode = 0;
+var prevMouseX = 0, prevMouseY = 0, x = 0, y = 0;
+var enableDrag = false;
+var enablePrompt = 0;
+
+function setup()
+{
+	var canvas = createCanvas(640, 480);
+	canvas.parent('sketch');
+	textSize(12);
+}
+
+function draw()
+{
+	background(255);
+	if (mode == 0)
+	{
+		enablePrompt = 0;
+		image(mapPNG, x-800, y-800);
+		if (mouseIsPressed)
+		{
+			x += mouseX - prevMouseX;
+			y += mouseY - prevMouseY;
+		}
+		prevMouseX = mouseX;
+		prevMouseY = mouseY;
+	}
+	if (mode == 1)
+	{
+		enablePrompt++;
+		fill(200);
+		analyzeButton.draw();
+		fill(200);
+		changeURL.draw();
+		if (analyzeButton.clicked)
+			processImage();
+		if (changeURL.clicked)
+			enablePrompt = 0;
+		image(img, 10, 180, 300, 200);
+		fill(0);
+		text("URL: " + imgURL, 10, 20);
+		text("Click button to analyze image", 10, 40);
+		text("Caption: " + imgCaption, 10, 130);
+		text("Top 3 tags: " + imgTags[0] + ", " + imgTags[1] + ", " + imgTags[2], 10, 150);
+	}
+	
+	if (enablePrompt == 1)
+	{
+		imgURL = prompt("Enter URL to be analyzed");
+	}
+	
+	fill(200);
+	modeButton.draw();
+	if (modeButton.clicked)
+		mode++;
+	if (mode > 1)
+		mode = 0;
+	mouseIsReleased = false;
+}
+
+function mouseReleased(){mouseIsReleased = true;}
+function processImage() 
+{
+	var subscriptionKey = "98a8c00f57a5494689bc4a81512ca690";
+	var uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/analyze";
+
+	var params = {
+		"visualFeatures": "Categories,Description,Color",
+		"details": "",
+		"language": "en",
+	};
+
+	// Perform the REST API call.
+	$.ajax({
+		url: uriBase + "?" + $.param(params),
+		// Request headers.
+		beforeSend: function(xhrObj)
+		{
+			xhrObj.setRequestHeader("Content-Type","application/json");
+			xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+		},
+		type: "POST",
+		// Request body.
+		data: '{"url": ' + '"' + imgURL + '"}',
+		})
+
+	.done(function(data) //Store analysis values into things
+	{
+		JSONData = JSON.stringify(data, null, 2);
+		imgCaption = data.description.captions[0].text.charAt(0).toUpperCase() + data.description.captions[0].text.slice(1) + ". (Confidence: " + data.description.captions[0].confidence + ")";
+		imgTags = data.description.tags;
+	})
+};
